@@ -19,7 +19,7 @@ TId 教師編號,Tname教師姓名
 SC(SId,CId,score)
 SId 學生編號,CId 課程編號,score 分數
 
-![image]()
+![image](image/pic_table.jpg)
 
 ## 產生資料SQL
 ```sql
@@ -197,7 +197,7 @@ and c.Sid=a.Sid
 and d.Cid=a.Cid
 and e.Cid=b.Cid
 ```
-![image]()
+![image](image/q1.jpg)
 
 2.	查詢同時存在" 01 "課程和" 02 "課程的情況
 
