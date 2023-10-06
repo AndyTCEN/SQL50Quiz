@@ -472,11 +472,186 @@ ON sc.SId=avgsc.SId
 及格為>=60，中等為：70-80，優良為：80-90，優秀為：>=90
 要求輸出課程號和選修人數，查詢結果按人數降冪排列，若人數相同，按課程號昇冪排列
 >Think：
+>>1. 先處理各科最高、最低、平均分
+>>2. 建立級距表、顯示級距結果
+>>3. 統計級距數量(不可使用Count，要用SUM)
+>>4. 各級距比率，除法轉型
+>>5. 計算結果組合
+
 
 ```sql
+--先處理各科最高、最低、平均分
+SELECT CID,MAX(score) Maxsc,MIN(score)Minsc,AVG(score) Avgsc,COUNT(CID) Students FROM SC
+GROUP BY CID
+
+--建立級距表、顯示級距結果
+SELECT *,
+(
+CASE
+WHEN score BETWEEN 60 AND 69
+THEN '及格'
+WHEN score BETWEEN 70 AND 79
+THEN '中等'
+WHEN score BETWEEN 80 AND 89
+THEN '優良'
+WHEN score >=90
+THEN '優秀'
+ELSE '不及格'
+END
+) ScoreRange
+FROM SC
+
+--統計級距數量(不可使用Count，要用SUM)
+--錯誤COUNT，會計算成總數量，不會算各別數量
+SELECT A.CID,COUNT('及格') 及格人數,COUNT('中等') 中等人數,COUNT('優良') 優良人數,
+COUNT('優秀') 優秀人數,COUNT('不及格') 不及格人數,COUNT(A.CID) 總修課人數 FROM (
+SELECT *,
+(
+CASE
+WHEN score BETWEEN 60 AND 69
+THEN '及格'
+WHEN score BETWEEN 70 AND 79
+THEN '中等'
+WHEN score BETWEEN 80 AND 89
+THEN '優良'
+WHEN score >=90
+THEN '優秀'
+ELSE '不及格'
+END
+) ScoreRange
+FROM SC
+) A
+GROUP BY A.CID
+
+--正確SUM，用WHEN THEN加總
+SELECT A.CID,
+SUM(Case WHEN A.ScoreRange='及格' THEN 1 ELSE 0 END) 及格人數,
+SUM(Case WHEN A.ScoreRange='中等' THEN 1 ELSE 0 END) 中等人數,
+SUM(Case WHEN A.ScoreRange='優良' THEN 1 ELSE 0 END) 優良人數,
+SUM(Case WHEN A.ScoreRange='優秀' THEN 1 ELSE 0 END) 優秀人數,
+SUM(Case WHEN A.ScoreRange='不及格' THEN 1 ELSE 0 END) 不及格人數,
+COUNT(A.CID) 總修課人數
+FROM (
+SELECT *,
+(
+CASE
+WHEN score BETWEEN 60 AND 69
+THEN '及格'
+WHEN score BETWEEN 70 AND 79
+THEN '中等'
+WHEN score BETWEEN 80 AND 89
+THEN '優良'
+WHEN score >=90
+THEN '優秀'
+ELSE '不及格'
+END
+) ScoreRange
+FROM SC
+) A
+GROUP BY A.CID
+
+--各級距比率，除法轉型
+----除法，2*1.0的原因在將2轉成float才會顯示結果，
+----2為int，結果為int，結果為0
+select 2/6
+----2.0為float，結果為float，結果為0.3333
+select 2*1.0/6
+
+--各級距比率
+SELECT B.CId,
+B.及格人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.及格人數*1.0/B.總修課人數)*100)))+'%' AS 及格率,
+B.中等人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.中等人數*1.0/B.總修課人數)*100)))+'%' AS 中等率,
+B.優良人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.優良人數*1.0/B.總修課人數)*100)))+'%' AS 優良率,
+B.優秀人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.優秀人數*1.0/B.總修課人數)*100)))+'%' AS 優秀率,
+B.不及格人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.不及格人數*1.0/B.總修課人數)*100)))+'%' AS 不及格率,
+B.總修課人數
+FROM(
+SELECT A.CID,
+SUM(Case WHEN A.ScoreRange='及格' THEN 1 ELSE 0 END) 及格人數,
+SUM(Case WHEN A.ScoreRange='中等' THEN 1 ELSE 0 END) 中等人數,
+SUM(Case WHEN A.ScoreRange='優良' THEN 1 ELSE 0 END) 優良人數,
+SUM(Case WHEN A.ScoreRange='優秀' THEN 1 ELSE 0 END) 優秀人數,
+SUM(Case WHEN A.ScoreRange='不及格' THEN 1 ELSE 0 END) 不及格人數,
+COUNT(A.CID) 總修課人數
+FROM (
+SELECT *,
+(
+CASE
+WHEN score BETWEEN 60 AND 69
+THEN '及格'
+WHEN score BETWEEN 70 AND 79
+THEN '中等'
+WHEN score BETWEEN 80 AND 89
+THEN '優良'
+WHEN score >=90
+THEN '優秀'
+ELSE '不及格'
+END
+) ScoreRange
+FROM SC
+) A
+GROUP BY A.CID)
+B
+
+--計算結果組合 最後SQL
+SELECT Scinfo.CId,cs.Cname,ScRange.* FROM 
+(SELECT CID,MAX(score) Maxsc,MIN(score)Minsc,AVG(score) Avgsc,COUNT(CID) Students FROM SC
+GROUP BY CID) Scinfo
+JOIN
+(SELECT B.CId,
+B.及格人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.及格人數*1.0/B.總修課人數)*100)))+'%' AS 及格率,
+B.中等人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.中等人數*1.0/B.總修課人數)*100)))+'%' AS 中等率,
+B.優良人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.優良人數*1.0/B.總修課人數)*100)))+'%' AS 優良率,
+B.優秀人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.優秀人數*1.0/B.總修課人數)*100)))+'%' AS 優秀率,
+B.不及格人數,
+CONVERT(varchar,(CONVERT(decimal(5,2),(B.不及格人數*1.0/B.總修課人數)*100)))+'%' AS 不及格率,
+B.總修課人數
+FROM(
+SELECT A.CID,
+SUM(Case WHEN A.ScoreRange='及格' THEN 1 ELSE 0 END) 及格人數,
+SUM(Case WHEN A.ScoreRange='中等' THEN 1 ELSE 0 END) 中等人數,
+SUM(Case WHEN A.ScoreRange='優良' THEN 1 ELSE 0 END) 優良人數,
+SUM(Case WHEN A.ScoreRange='優秀' THEN 1 ELSE 0 END) 優秀人數,
+SUM(Case WHEN A.ScoreRange='不及格' THEN 1 ELSE 0 END) 不及格人數,
+COUNT(A.CID) 總修課人數
+FROM (
+SELECT *,
+(
+CASE
+WHEN score BETWEEN 60 AND 69
+THEN '及格'
+WHEN score BETWEEN 70 AND 79
+THEN '中等'
+WHEN score BETWEEN 80 AND 89
+THEN '優良'
+WHEN score >=90
+THEN '優秀'
+ELSE '不及格'
+END
+) ScoreRange
+FROM SC
+) A
+GROUP BY A.CID)
+B) ScRange
+ON Scinfo.CId=ScRange.CId
+
+JOIN Course cs
+ON Scinfo.CId=cs.CId
+ORDER BY 
+ScRange.總修課人數 Desc,
+Scinfo.CId Asc
 
 ```
-![image](image/q.jpg)
+![image](image/q18.jpg)
 
 19.	按各科成績進行排序，並顯示排名， Score 重複時保留名次空缺
 >Think：
