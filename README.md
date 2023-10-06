@@ -415,28 +415,56 @@ WHERE B.Tname='張三'
 ![image](image/q14.jpg)
 
 15.	查詢兩門及其以上不及格課程的同學的學號，姓名及其平均成績 
->Think：
+>Think：先找不及格，再group by 數量
 
 ```sql
-
+SELECT * FROM Student WHERE 
+SId IN (
+SELECT SID FROM SC
+WHERE score<60
+GROUP BY SID
+HAVING COUNT(SID)>=2
+)
 ```
-![image](image/q.jpg)
+![image](image/q15.jpg)
 
 16.	檢索" 01 "課程分數小於 60，按分數降冪排列的學生資訊
->Think：
+>Think：用Join，注意用IN會錯誤
 
 ```sql
+--正確
+SELECT * FROM Student st
+JOIN (
+SELECT SID,score FROM SC
+WHERE CID=01
+AND score<60
+) sc
+ON st.SId=sc.SId
+ORDER BY sc.score DESC
 
+--錯誤
+SELECT * FROM Student 
+WHERE SID IN (
+SELECT SID FROM SC
+WHERE CID=01
+AND score<60
+ORDER BY score DESC
+)
 ```
-![image](image/q.jpg)
+![image](image/q16.jpg)
 
 17.	按平均成績從高到低顯示所有學生的所有課程的成績以及平均成績
->Think：
+>Think：先整理AVG，再JOIN到課程
 
 ```sql
-
+SELECT sc.*, avgsc.avgscore FROM SC sc
+JOIN(
+SELECT SID,AVG(score) avgscore FROM SC
+GROUP BY SID
+) avgsc
+ON sc.SId=avgsc.SId
 ```
-![image](image/q.jpg)
+![image](image/q17.jpg)
 
 18.	查詢各科成績最高分、最低分和平均分：
 
