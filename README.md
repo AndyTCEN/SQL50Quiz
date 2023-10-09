@@ -873,74 +873,149 @@ AND cu.Cname='數學'
 ![image](image/q33.jpg)
 
 34.	查詢所有學生的課程及分數情況（存在學生沒成績，沒選課的情況）
->Think：
+>Think：用Student(大表) LEFT JOIN sc(小表)
 
 ```sql
-
+SELECT * FROM Student st
+LEFT JOIN SC sc
+ON st.SId=sc.SId
 ```
-![image](image/q.jpg)
+![image](image/q34.jpg)
 
 35.	查詢任何一門課程成績在 70 分以上的姓名、課程名稱和分數
->Think：
+>Think：用JOIN
 
 ```sql
-
+SELECT DISTINCT st.Sname,cu.CName,sc.score FROM SC sc
+JOIN Student st
+ON sc.SId=st.SId
+JOIN Course cu
+ON cu.CId=sc.CId
+WHERE 
+1=1
+AND sc.score>70
 ```
-![image](image/q.jpg)
+![image](image/q35.jpg)
 
 36.	查詢不及格的課程
->Think：
+>Think：用JOIN
+
 
 ```sql
-
+SELECT DISTINCT st.Sname,cu.CName,sc.score FROM SC sc
+JOIN Student st
+ON sc.SId=st.SId
+JOIN Course cu
+ON cu.CId=sc.CId
+WHERE 
+1=1
+AND sc.score<60
 ```
-![image](image/q.jpg)
+![image](image/q36.jpg)
 
 37.	查詢課程編號為 01 且課程成績在 80 分以上的學生的學號和姓名
->Think：
+>Think：用JOIN
+
 
 ```sql
-
+SELECT DISTINCT st.SId, st.Sname,cu.CName,sc.score FROM SC sc
+JOIN Student st
+ON sc.SId=st.SId
+JOIN Course cu
+ON cu.CId=sc.CId
+WHERE 
+1=1
+AND sc.score>=80
+AND sc.CId=01
 ```
-![image](image/q.jpg)
+![image](image/q37.jpg)
 
 38.	求每門課程的學生人數 
->Think：
+>Think：用GROUP BY
 
 ```sql
-
+SELECT CID, COUNT(*) CuCount
+FROM SC
+GROUP BY CID
 ```
-![image](image/q.jpg)
+![image](image/q38.jpg)
 
 39.	成績不重複，查詢選修「張三」老師所授課程的學生中，成績最高的學生資訊及其成績
->Think：
+>Think：成績最高，成績不重複(不跳號)用DENSE_RANK() JOIN 他表
 
 ```sql
-
+SELECT st.*,B.score FROM Student st
+JOIN
+(
+SELECT 
+DENSE_RANK() OVER(PARTITION BY CID ORDER BY score DESC) TH,
+SID,CID,score FROM sc
+)B
+ON B.SId=st.SId
+JOIN Course cu
+ON cu.CId=B.CId
+JOIN Teacher ta
+ON ta.TId=cu.TId
+WHERE 1=1
+AND ta.Tname='張三'
+AND B.TH=1
 ```
-![image](image/q.jpg)
+![image](image/q39.jpg)
 
-1.  成績有重複的情況下，查詢選修「張三」老師所授課程的學生中，成績最高的學生資訊及其成績
->Think：
+40.  成績有重複的情況下，查詢選修「張三」老師所授課程的學生中，成績最高的學生資訊及其成績
+>Think：成績最高，成績重複(跳號)用RANK() JOIN 他表
 
 ```sql
-
+SELECT st.*,B.score FROM Student st
+JOIN
+(
+SELECT 
+RANK() OVER(PARTITION BY CID ORDER BY score DESC) TH,
+SID,CID,score FROM sc
+)B
+ON B.SId=st.SId
+JOIN Course cu
+ON cu.CId=B.CId
+JOIN Teacher ta
+ON ta.TId=cu.TId
+WHERE 1=1
+AND ta.Tname='張三'
+AND B.TH=1
 ```
-![image](image/q.jpg)
+![image](image/q40.jpg)
 41.	查詢不同課程成績相同的學生的學生編號、課程編號、學生成績 
->Think：
+>Think：不同課程、成績相同，同表比較用CROSS JOIN
 
 ```sql
-
+SELECT * FROM SC A,SC B
+WHERE 1=1
+AND A.score=B.score
+AND A.CId<>B.CId
+AND A.SId<>B.SId
 ```
-![image](image/q.jpg)
+![image](image/q41.jpg)
 42.	查詢每門功成績最好的前兩名
->Think：
+>Think：用RANK找各科前兩名
 
 ```sql
-
+SELECT st.*,cu.Cname,B.score FROM Student st
+JOIN 
+(
+SELECT 
+SID,
+RANK() OVER(PARTITION BY CID ORDER BY score DESC) TH,
+CID,
+score
+FROM SC
+) B
+ON B.SId=st.SId
+JOIN Course cu
+ON cu.CId=B.CId
+WHERE 1=1
+AND B.TH <3
+ORDER BY cu.CId, B.TH
 ```
-![image](image/q.jpg)
+![image](image/q42.jpg)
 43.	統計每門課程的學生選修人數（超過 5 人的課程才統計）。
 >Think：
 
