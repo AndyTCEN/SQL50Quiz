@@ -669,28 +669,39 @@ ORDER BY CID,score desc
 ![image](image/q19.jpg)
 
 20.	按各科成績進行排序，並顯示排名， Score 重複時合併名次
->Think：
+>Think：用DENSE_RANK() OVER(PARTITION BY CID ORDER BY Score Desc)
+可進行不跳號排序
 
 ```sql
-
+SELECT 
+DENSE_RANK() OVER (PARTITION BY CID ORDER BY score desc) Th,
+*
+FROM sc
+ORDER BY CID,score desc
 ```
-![image](image/q.jpg)
+![image](image/q20.jpg)
 
 21.	查詢學生的總成績，並進行排名，總分重複時保留名次空缺
->Think：
+>Think：1.各學生總成績(GROUP BY SID)、2.用RANK()，依成績排名跳號
 
 ```sql
-
+SELECT RANK() OVER (ORDER BY SUM(score) DESC) TH,SID,SUM(score) Totalscore
+FROM sc
+GROUP BY SID
 ```
-![image](image/q.jpg)
+![image](image/q21.jpg)
 
 22.	查詢學生的總成績，並進行排名，總分重複時不保留名次空缺
->Think：
+>Think：用DENSE_RANK()，依成績不跳號
 
 ```sql
-
+SELECT DENSE_RANK() OVER(
+ORDER BY SUM(score) DESC) Th,
+SID,SUM(score) Totalscore
+FROM sc
+GROUP BY sid
 ```
-![image](image/q.jpg)
+![image](image/q22.jpg)
 
 23.	統計各科成績各分數段人數：課程編號，課程名稱，[100-85]，[85-70]，[70-60]，[60-0] 及所占百分比
 >Think：
