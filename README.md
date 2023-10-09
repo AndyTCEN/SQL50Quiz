@@ -704,20 +704,53 @@ GROUP BY sid
 ![image](image/q22.jpg)
 
 23.	統計各科成績各分數段人數：課程編號，課程名稱，[100-85]，[85-70]，[70-60]，[60-0] 及所占百分比
->Think：
+>Think：1. 用CASE WHEN 計算百分比人數 2.GROUP BY 分類各科
 
 ```sql
-
+SELECT C.Cname, B.CID,
+R100_85,CONVERT(decimal(5,2),R100_85*1.0/Total) R100_85percent,
+R85_70,CONVERT(decimal(5,2),R85_70*1.0/Total) R85_70percent,
+R70_60,CONVERT(decimal(5,2),R70_60*1.0/Total) R70_60percent,
+R60_0,CONVERT(decimal(5,2),R60_0*1.0/Total) R60_percent,
+Total
+FROM
+(
+SELECT CID,
+SUM(CASE WHEN score>=85  AND score <=100 THEN 1 ELSE 0 END) R100_85,
+SUM(CASE WHEN score>=70  AND score <85 THEN 1 ELSE 0 END) R85_70,
+SUM(CASE WHEN score>=60  AND score <70 THEN 1 ELSE 0 END) R70_60,
+SUM(CASE WHEN score <60 THEN 1 ELSE 0 END) R60_0,
+COUNT(*) Total
+FROM sc
+GROUP BY CID
+)B
+JOIN 
+COURSE C
+on B.CId=C.CId
 ```
-![image](image/q.jpg)
+![image](image/q23.jpg)
 
 24.	查詢各科成績前三名的記錄
->Think：
+>Think：1.各科，考慮用GROUP BY或PARTITION BY 2.同分要怎麼處理
 
 ```sql
+--錯誤：sid沒有GROUP BY，且同分狀況沒有考慮到
+SELECT TOP 3 *
+FROM sc
+GROUP BY CID
+ORDER BY score DESC
 
+--正確：改用RANK判斷名次，可協助處理同分狀況
+SELECT * FROM
+(
+SELECT 
+RANK() OVER (PARTITION BY CID ORDER BY SCORE DESC) TH,
+*
+FROM sc
+) A
+WHERE A.TH BETWEEN 1 AND 3
 ```
-![image](image/q.jpg)
+![image](image/q24.jpg)
 
 25.	查詢每門課程被選修的學生數 
 >Think：
