@@ -654,12 +654,19 @@ Scinfo.CId Asc
 ![image](image/q18.jpg)
 
 19.	按各科成績進行排序，並顯示排名， Score 重複時保留名次空缺
->Think：
+>Think：用Rank() OVER (PARTITION BY CID ORDER BY Score Desc)
+補充資料：<a href="#overpartition"> OVER、RATRITION的用法</a>
 
 ```sql
-
+SELECT 
+RANK() OVER (PARTITION BY CID ORDER BY score desc) Th
+,[SId]
+,[CId]
+,[score]
+FROM [dbo].[SC]
+ORDER BY CID,score desc
 ```
-![image](image/q.jpg)
+![image](image/q19.jpg)
 
 20.	按各科成績進行排序，並顯示排名， Score 重複時合併名次
 >Think：
@@ -821,7 +828,7 @@ Scinfo.CId Asc
 ```
 ![image](image/q.jpg)
 
-40. 成績有重複的情況下，查詢選修「張三」老師所授課程的學生中，成績最高的學生資訊及其成績
+1.  成績有重複的情況下，查詢選修「張三」老師所授課程的學生中，成績最高的學生資訊及其成績
 >Think：
 
 ```sql
@@ -905,3 +912,65 @@ Scinfo.CId Asc
 
 ```
 ![image](image/q.jpg)
+
+## 補充
+<div id='overpartition'>
+<h2>OVER、RATRITION的用法</h2>
+
+用法案例：
+```sql
+SELECT 
+RANK() OVER (PARTITION BY CID ORDER BY score desc) Th
+,[SId]
+      ,[CId]
+      ,[score]
+  FROM [dbo].[SC]
+ORDER BY CID,score desc
+```
+參考資料：https://blog.csdn.net/WuLex/article/details/115037696
+參考資料：https://learn.microsoft.com/zh-tw/sql/t-sql/queries/select-over-clause-transact-sql?view=sql-server-ver16
+說明：
+1.	OVER 稱為視窗函數，OVER子句會先定義查詢結果的分類、排序方式，功能類似GROUP BY
+2.	OVER  vs  GROUP BY，OVER 會將搜尋結果全部顯示，GROUP BY 則是不重複顯示(匯集、只顯示一筆)
+比較圖：
+![Alt text](image/image-1.png)
+OVER用法：
+放在SUM、AVG、COUNT後面
+1.	不加子句：類似GROUP BY，計算全部並顯示整個結果
+2.	PARTITION BY：分類
+3.	ORDER BY：排序
+4.	ROWS、RANGE：ROWS範圍
+
+案例：
+```sql
+SELECT 
+SUM(score) OVER() OVER_ALL,
+SUM(score) OVER(PARTITION BY CID) OVER_PARTITION,
+SUM(score) OVER(ORDER BY CID) OVER_ORDER,
+CID,
+score,
+sid
+FROM sc 
+ORDER BY CID
+```
+![Alt text](image/image-2.png)
+說明：
+OVER_ALL：全部總和
+OVER_PARTITION：依CID分組總和
+OVER_ORDER：依CID排序總和(相同排序會直接加總)
+
+補充：
+* 也可與GROUP BY結合，這樣計算就是以GROUP BY的資料為主
+```sql
+SELECT 
+SUM(score) OVER(order by cid) OVER_ALL,
+score,
+cid
+FROM SC
+GROUP BY score,cid
+```
+![Alt text](image/image-3.png)
+
+* OVER不可用在MYSQL
+
+</div>
