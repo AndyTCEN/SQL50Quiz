@@ -753,52 +753,80 @@ WHERE A.TH BETWEEN 1 AND 3
 ![image](image/q24.jpg)
 
 25.	查詢每門課程被選修的學生數 
->Think：
+>Think：用GROUP BY 或COUNT OVER，用COUNT(*)
 
 ```sql
-
+--GROUP BY
+SELECT COUNT(*) TotalStudent,CID FROM SC
+GROUP BY CID
+-- COUNT OVER 注意重複
+SELECT DISTINCT COUNT(*) OVER(PARTITION BY CID) TotalStudent,CID
+FROM sc
 ```
-![image](image/q.jpg)
+![image](image/q25.jpg)
 
 26.	查詢出只選修兩門課程的學生學號和姓名 
->Think：
+>Think：用GROUP BY
 
 ```sql
-
+SELECT st.* FROM Student st
+JOIN (
+SELECT SID FROM SC
+GROUP BY SID 
+HAVING COUNT(*)=2
+) B
+ON st.SId=B.SId
 ```
-![image](image/q.jpg)
+![image](image/q26.jpg)
 
 27.	查詢男生、女生人數
->Think：
+>Think：用CASE WHEN SUM 或用 GROUP BY Ssex 
 
 ```sql
+--CASE WHEN SUM
+SELECT 
+SUM(CASE WHEN Ssex='男' THEN 1 ELSE 0 END) 男,
+SUM(CASE WHEN Ssex='女' THEN 1 ELSE 0 END) 女
+FROM Student
 
+--GROUP BY Ssex 
+SELECT 
+Ssex,COUNT(*) GenderCount
+FROM Student
+GROUP BY Ssex
 ```
-![image](image/q.jpg)
+![image](image/q27.jpg)
 
 28.	查詢名字中含有「風」字的學生資訊
->Think：
+>Think：用LIKE % 模糊搜尋
 
 ```sql
-
+SELECT * FROM Student 
+WHERE Sname LIKE '%風%'
 ```
-![image](image/q.jpg)
+![image](image/q28.jpg)
 
 29.	查詢同名同性學生名單，並統計同名人數
->Think：
+>Think：看到同名同性，相同表單比較，用CROSS JOIN
 
 ```sql
-
+SELECT * FROM Student A,Student B
+WHERE 1=1
+AND SUBSTRING(A.Sname,1,1)=SUBSTRING(B.Sname,1,1)
+AND A.Ssex=B.Ssex
+AND A.SId<>B.SId
 ```
-![image](image/q.jpg)
+![image](image/q29.jpg)
 
 30.	查詢 1990 年出生的學生名單
->Think：
+>Think：用YEAR()
 
 ```sql
-
+SELECT * FROM Student
+WHERE 
+YEAR(Sage)=1990
 ```
-![image](image/q.jpg)
+![image](image/q30.jpg)
 
 31.	查詢每門課程的平均成績，結果按平均成績降冪排列，平均成績相同時，按課程編號昇冪排列
 >Think：
