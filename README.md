@@ -829,28 +829,48 @@ YEAR(Sage)=1990
 ![image](image/q30.jpg)
 
 31.	查詢每門課程的平均成績，結果按平均成績降冪排列，平均成績相同時，按課程編號昇冪排列
->Think：
+>Think：用GROUP BY
 
 ```sql
-
+SELECT CID,AVG(score) AVGSC
+FROM SC
+GROUP BY CID
+ORDER BY AVG(score) DESC,CID
 ```
-![image](image/q.jpg)
+![image](image/q31.jpg)
 
 32.	查詢平均成績大於等於 85 的所有學生的學號、姓名和平均成績 
->Think：
+>Think：用GROUP BY
 
 ```sql
+SELECT st.*, B.AVGSC FROM Student st
+JOIN
+(
+SELECT SID,AVG(score) AVGSC
+FROM SC
+GROUP BY SID
+HAVING AVG(score) >=85
+)B
+ON st.SId=B.SId
 
 ```
-![image](image/q.jpg)
+![image](image/q32.jpg)
 
 33.	查詢課程名稱為「數學」，且分數低於 60 的學生姓名和分數 
->Think：
+>Think：用JOIN
 
 ```sql
-
+SELECT st.Sname,sc.score FROM Student st
+JOIN SC sc
+ON st.SId=sc.SId
+JOIN Course cu
+ON cu.CId=sc.CId
+WHERE 
+1=1
+AND sc.score<60
+AND cu.Cname='數學'
 ```
-![image](image/q.jpg)
+![image](image/q33.jpg)
 
 34.	查詢所有學生的課程及分數情況（存在學生沒成績，沒選課的情況）
 >Think：
