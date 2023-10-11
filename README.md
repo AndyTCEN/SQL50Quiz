@@ -1056,39 +1056,76 @@ FROM Student
 ![image](image/q46.jpg)
 47.	按照出生日期來算，當前月日 < 出生年月的月日則，年齡減一
 >Think：
+>1.以年月日計算，用DATEADD(YEAR)，加年齡到同一年，比較月日，若大於則還沒過生日，故減一
+>2.考慮SQL可讀性，使用temp table暫存計算後的年齡
 
 ```sql
 
+
+--使用#temp
+SELECT SID,DATEDIFF(YEAR,Sage,GETDATE()) TempAge INTO #temp FROM Student
+
+SELECT *,
+CASE WHEN DATEADD(YEAR,tempst.TempAge,st.Sage)>GETDATE() 
+THEN tempst.TempAge-1
+ELSE tempst.TempAge
+END AS RealAge
+FROM Student st
+JOIN #temp tempst
+ON st.SId=tempst.SId
+
+DROP TABLE #temp
+
+
+--不使用#temp 直接計算
+SELECT *,
+CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,Sage,GETDATE()),Sage)>GETDATE() 
+THEN DATEDIFF(YEAR,Sage,GETDATE())-1
+ELSE DATEDIFF(YEAR,Sage,GETDATE())
+END AS RealAge
+FROM Student
 ```
-![image](image/q.jpg)
+![image](image/q47.jpg)
 48.	查詢本周過生日的學生資訊
->Think：
+>Think：1. 使用DATEPART(WEEK) 2.計算學生生日在今年的周 3.計算今天的周 4.條件搜尋
 
 ```sql
-
+SELECT *,
+DATEPART(WEEK,DATEADD(YEAR,DATEDIFF(YEAR,Sage,GETDATE()),Sage)) SageWeek,
+DATEPART(WEEK,GETDATE()) NowWeek
+ FROM Student
 ```
-![image](image/q.jpg)
+![image](image/q48.jpg)
 49.	查詢下周過生日的學生資訊
->Think：
+>Think：1. 使用DATEPART(WEEK) 2.計算學生生日在今年的周 3.用DATEADD(WEEK)，加到下一周 4.條件搜尋
 
 ```sql
-
+SELECT *,
+DATEPART(WEEK,DATEADD(YEAR,DATEDIFF(YEAR,Sage,GETDATE()),Sage)) SageWeek,
+DATEPART(WEEK,DATEADD(WEEK,1,GETDATE())) NowWeek 
+FROM Student
 ```
-![image](image/q.jpg)
+![image](image/q49.jpg)
 50.	查詢本月過生日的學生資訊
->Think：
+>Think：1. 使用MONTH() 2.計算學生生日在今年的月 3.計算今天的月 4.條件搜尋
 
 ```sql
-
+SELECT * ,
+MONTH(Sage) AS SageMon,
+MONTH(GETDATE()) AS NowMon
+FROM Student
 ```
-![image](image/q.jpg)
+![image](image/q50.jpg)
 51.	查詢下月過生日的學生資訊
->Think：
+>Think：1. 使用MONTH() 2.計算學生生日在今年的月 3.用DATEADD(MONTH)，加到下一月 4.條件搜尋
 
 ```sql
-
+SELECT * ,
+MONTH(Sage) AS SageMon,
+MONTH(DATEADD(MONTH,1, GETDATE())) AS NowMon
+FROM Student
 ```
-![image](image/q.jpg)
+![image](image/q51.jpg)
 
 ## 補充
 <div id='overpartition'>
