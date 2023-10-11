@@ -1046,12 +1046,14 @@ SELECT COUNT(*) FROM Course
 ```
 ![image](image/q45.jpg)
 46.	查詢各學生的年齡，只按年份來算 
->Think：
+>Think：用DATEDIFF計算
+>補充資料：<a href="#datediff"> Datediff的用法</a>
 
 ```sql
-
+SELECT *,DATEDIFF(YYYY,Sage,GETDATE()) AS Age 
+FROM Student
 ```
-![image](image/q.jpg)
+![image](image/q46.jpg)
 47.	按照出生日期來算，當前月日 < 出生年月的月日則，年齡減一
 >Think：
 
@@ -1148,4 +1150,37 @@ GROUP BY score,cid
 
 * OVER不可用在MYSQL
 
+</div>
+
+<div id='datediff'>
+<h2>DATEDIFF 計算日期的用法</h2>
+
+參考資料：https://support.microsoft.com/zh-tw/office/datediff-%E5%87%BD%E6%95%B8-e6dd7ee6-3d01-4531-905c-e24fc238f85f
+
+DATEDIFF 格式：DATEDIFF(指定格式,起日,迄日)　RETURN INT
+案例：DATEDIFF(YYYY,Sage,GETDATE())
+
+指定格式說明：
+
+|設定	|描述|
+|:-----|:-----|
+|yyyy // YEAR|	年|
+|q	|季|
+|m	|月份|
+|Y // DAY|	一年中的一天|
+|D // DAY|	日期|
+|w	|Weekday|
+|ww|	週|
+|h|	時|
+|n|	分鐘|
+|s|	秒|
+
+案例：
+```sql
+SELECT *,DATEDIFF(YEAR,Sage,GETDATE()) AS Age FROM Student
+ 
+SELECT *,DATEDIFF(DAY,Sage,GETDATE()) AS Age FROM Student
+ ```
+![Alt text](image/datediff_year.png)
+![Alt text](image/datediff_day.png)
 </div>
