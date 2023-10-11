@@ -1156,24 +1156,28 @@ GROUP BY score,cid
 <h2>DATEDIFF 計算日期的用法</h2>
 
 參考資料：https://support.microsoft.com/zh-tw/office/datediff-%E5%87%BD%E6%95%B8-e6dd7ee6-3d01-4531-905c-e24fc238f85f
-
+參考資料：https://www.fooish.com/sql/sql-server-datediff-function.html
 DATEDIFF 格式：DATEDIFF(指定格式,起日,迄日)　RETURN INT
 案例：DATEDIFF(YYYY,Sage,GETDATE())
 
 指定格式說明：
 
-|設定	|描述|
+|datepart (全名和縮寫)	|說明|
 |:-----|:-----|
-|yyyy // YEAR|	年|
-|q	|季|
-|m	|月份|
-|Y // DAY|	一年中的一天|
-|D // DAY|	日期|
-|w	|Weekday|
-|ww|	週|
-|h|	時|
-|n|	分鐘|
-|s|	秒|
+|year, yyyy, yy	|年|
+|month, mm, m	|月|
+|day, dd, d	|日|
+|hour, hh	|時|
+|minute, n	|分|
+|second, ss, s	|秒|
+|millisecond, ms	|毫秒|
+|microsecond, mcs	|微秒|
+|nanosecond, ns	|毫微秒|
+|quarter, qq, q	|季|
+|dayofyear, dy, y	|一年中的第幾天|
+|week, wk, ww	|週|
+
+
 
 案例：
 ```sql
