@@ -1017,26 +1017,34 @@ ORDER BY cu.CId, B.TH
 ```
 ![image](image/q42.jpg)
 43.	統計每門課程的學生選修人數（超過 5 人的課程才統計）。
->Think：
+>Think：用GROUP BY
 
 ```sql
-
+SELECT CID,COUNT(*) AS Students FROM SC
+GROUP BY CID
+HAVING COUNT(*) >5
 ```
-![image](image/q.jpg)
+![image](image/q43.jpg)
 44.	檢索至少選修兩門課程的學生學號 
->Think：
+>Think：用GROUP BY
 
 ```sql
-
+SELECT SID,COUNT(*) Courses FROM SC
+GROUP BY SID
+HAVING COUNT(*)>=2
 ```
-![image](image/q.jpg)
+![image](image/q44.jpg)
 45.	查詢選修了全部課程的學生資訊
->Think：
+>Think：1.先GROUP BY SID 計算學生選課數 2. 再計算全部課程數 3.兩者相等(全部課程)
 
 ```sql
-
+SELECT SID FROM SC
+GROUP BY SID 
+HAVING COUNT(*)=(
+SELECT COUNT(*) FROM Course
+)
 ```
-![image](image/q.jpg)
+![image](image/q45.jpg)
 46.	查詢各學生的年齡，只按年份來算 
 >Think：
 
